@@ -1,3 +1,6 @@
+<img width="1737" height="687" alt="image" src="https://github.com/user-attachments/assets/157b3fba-86a5-406e-93d6-2903e0afc407" />
+
+
 # 🤖 AI-Powered HTTP Request Builder for n8n
 
 Turn plain English into executable HTTP API requests using AI.
