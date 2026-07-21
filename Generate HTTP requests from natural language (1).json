@@ -1,0 +1,212 @@
+{
+  "name": "Generate HTTP requests from natural language",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Generate HTTP requests from natural language\n\nOverview\n\nThis workflow converts natural language into executable HTTP requests using an AI Agent, an OpenAI Chat Model, and n8n's native HTTP Request node.\n\nInstead of manually configuring HTTP methods, URLs, headers, query parameters, authentication, and JSON request bodies, simply describe the API request in plain English.\n\nThe AI automatically plans and executes the request.\n\nWho is this for?\n\n• Developers\n• API testers\n• Automation builders\n• Backend engineers\n• Anyone learning REST APIs\n\nFeatures\n\n✅ Supports GET, POST, PUT, PATCH and DELETE\n\n✅ Generates request URLs\n\n✅ Builds request headers\n\n✅ Handles query parameters\n\n✅ Creates JSON request bodies\n\n✅ Supports dynamic authentication\n\n✅ Executes requests using n8n's HTTP Request node\n\nRequirements\n\n• OpenAI Chat Model credentials\n\n• API credentials for the target service (if required)\n\nSetup\n\n1. Configure your OpenAI Chat Model credentials.\n2. Open the User Request node.\n3. Describe your API request in natural language.\n4. Execute the workflow.\n\nExample requests\n\n• Get current weather in Tokyo using OpenWeather API.\n\n• Get the latest 5 commits from a GitHub repository.\n\n• Search Wikipedia for Albert Einstein.\n\n• Create a page in a Notion database.\n\n• Send a message to a Slack channel.",
+        "height": 1472,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        784,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "dd5141d8-64e8-449e-b183-5d81c8f7c335",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        240
+      ],
+      "id": "de7a9a0e-3791-430a-9768-8f3c4a4c0c4c",
+      "name": "🚀 Start Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.user_request }}",
+        "options": {
+          "systemMessage": "You never output JSON yourself. You always call the HTTP Request tool to perform the request.\n\nFor any request that describes an API call with enough information to build it (URL/service + method + necessary params), you MUST call the HTTP Request tool immediately. Do not ask clarifying questions unless the request is genuinely ambiguous about which API or endpoint to use.\n\nInfer the HTTP method (GET, POST, PUT, PATCH, DELETE) from the user's request.\n\nOnly include headers, query parameters, and body fields that can be determined from the user's request.\n\nNever invent API keys, access tokens, bearer tokens, secrets, passwords, database IDs, account IDs, or other credentials, and never use placeholder values like YOUR_API_KEY.\n\nIf the request requires authentication and none was provided, ask the user for the missing credential instead of guessing or calling the tool with a fake value.\n\nAfter the tool returns a result, summarize what happened in plain language for the user."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        48,
+        240
+      ],
+      "id": "60aac75d-dfb1-4d6c-98dd-1e20ac0cadc5",
+      "name": "🧠 AI Request Planner"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        496
+      ],
+      "id": "f0ba398d-1672-439b-9f9d-412c12be454f",
+      "name": "🤖 GPT-4.1 Mini",
+      "credentials": {
+        "openAiApi": {
+          "id": "jzNv8LiAwHCrDjeC",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Execute any HTTP request to any REST API.",
+        "method": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Method', 'HTTP method: GET, POST, PUT, PATCH, or DELETE', 'string') }}",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `The complete URL of the REST API endpoint.`, 'string') }}",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "={{ JSON.stringify($fromAI('Query', 'Return a JSON object. If there are no query parameters return {}. Never return null, empty string or text.', 'json')) }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={{ JSON.stringify($fromAI('Headers', 'Return a JSON object containing request headers. If no headers are needed return {}.', 'json')) }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($fromAI('Body', 'Return a JSON object. For GET requests return {}. Never return text or null.', 'json')) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        496
+      ],
+      "id": "089025aa-30b9-4080-ba5a-edf74d06fd8e",
+      "name": "🌐 HTTP Request Executor"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        400,
+        240
+      ],
+      "id": "e4468031-7531-4bbb-a296-0afb356280a9",
+      "name": "📋 API Response"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51f3cd6e-67ab-4fbd-a787-59cf77bd907e",
+              "name": "user_request",
+              "value": "Describe your API request here.  Example: Create a GitHub issue or Get weather for London or Create a Notion page  Credentials, IDs and request details can be included in this request when required.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        240
+      ],
+      "id": "ea9cefe7-b3ab-4697-8dc7-7c818c72999a",
+      "name": "📝 User Request node"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "🚀 Start Workflow": {
+      "main": [
+        [
+          {
+            "node": "📝 User Request node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 AI Request Planner": {
+      "main": [
+        [
+          {
+            "node": "📋 API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 GPT-4.1 Mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🧠 AI Request Planner",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🌐 HTTP Request Executor": {
+      "ai_tool": [
+        [
+          {
+            "node": "🧠 AI Request Planner",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 User Request node": {
+      "main": [
+        [
+          {
+            "node": "🧠 AI Request Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c7f58cd0-f1d8-436b-9221-98fb1a8e8282",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f098777c09d070a1b75b286517d932e4d1eb6941b4d7511a04eba023c03569"
+  },
+  "nodeGroups": [],
+  "id": "uTmKcOldgVTKaSr5",
+  "tags": []
+}
